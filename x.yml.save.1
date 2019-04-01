@@ -1,0 +1,15 @@
+---
+- hosts: all
+  become: true  
+  tasks:
+  - name: execute command 
+    command: "{{item}}"
+    with_items: 
+     - apt  update
+     -      - apt install -y  python3-pip
+
+     - apt install python-pip python-dev nginx git
+     - pip3 install -y virtualenv
+     - virtualenv venv
+     - source venv/bin/activate
+     - git clone https://github.com/ani1203/learnDjango.git

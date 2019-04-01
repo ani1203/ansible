@@ -1,0 +1,60 @@
+---
+- hosts: all
+  become: true
+  user: root
+  tasks:
+  - name: updating 
+  - name: ensure nginx is at the latest version 
+    apt: pkg=nginx state=present update_cache=true
+
+  - name: start nginx
+    service:
+       name: nginx
+       state: started
+  - name: clone a public repository
+    git:
+      repo: https://github.com/ani1203/learnDjango.git
+      dest: /home/ubuntu/learnDjango
+      version: master
+  - name: copy requirements.txt file 
+    copy: 
+      src: /etc/ansible/playbooks/requirements.txt
+      dest: /home/ubuntu/learnDjango
+  - name: copy gunicorn service file
+    copy:
+       src: /etc/ansible/playbooks/gunicorn.service
+       dest: /etc/systemd/system
+  - name: copy nginx file
+    copy: 
+       src: /etc/ansible/playbooks/learnDjango
+       dest: /etc/nginx/sites-available     
+  - name: execute command
+    command: "{{item}}"
+    with_items:
+      - apt  update
+      - apt install python3-pip python3-dev nginx git -y
+      - pip3 install Django==2.1.3
+      - pip3 install channels
+      - pip3 install psycopg2
+  - name: install virtualenv
+    pip: name=virtualenv state=latest virtualenv_command=virtualenv
+
+  - name: creating virtualenv
+    command: virtualenv /home/ubuntu/venv
+  
+  - name: activating environment
+    command: source /home/ubuntu/venv/bin/activate
+    command: /home/ubuntu/venv/bin/pip install -r /home/ubuntu/learnDjango/requirements.txt
+
+  - name: Install gunicorn
+    pip: name=gunicorn state=latest virtualenv=/home/ubuntu/venv
+  
+  - name: restart service nginx
+    systemd:
+      state: restarted
+      name: nginx
+
+  - name: restart service gunicorn again
+    systemd:
+      state: restarted
+      name: gunicorn

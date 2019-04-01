@@ -1,0 +1,12 @@
+---
+-  hosts: all
+   tasks: 
+   - name: creating link
+     file: 
+        src:  /etc/nginx/sites-available/learnDjango 
+        dest: /etc/nginx/sites-enabled
+        state: link
+
+     
+
+

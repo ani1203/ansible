@@ -1,0 +1,21 @@
+---
+- hosts: all
+  become: true
+  user: root
+  tasks:
+  - name: ensure nginx is at the latest version 
+    apt: pkg=nginx state=present update_cache=true
+
+  - name: start nginx
+    service:
+       name: nginx
+       state: started
+  - name: copy gunicorn service file
+    copy:
+       src: /etc/ansible/playbooks/gunicorn.service
+       dest: /etc/systemd/system
+  - name: copy nginx file
+    copy: 
+       src: /etc/ansible/playbooks/learnDjango
+       dest: /etc/nginx/sites-available   
+  - name: Install dependencies required to s

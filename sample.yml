@@ -1,0 +1,12 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: ensure nginx is at the latest version
+      apt: pkg=nginx state=present update_cache=true
+      # apt: name=nginx state=latest
+    - name: start nginx
+      service:
+          name: nginx
+          state: started
+ 

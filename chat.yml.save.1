@@ -1,0 +1,38 @@
+---
+- hosts: all
+  become: true
+  user: root
+  tasks:
+  - name: ensure nginx is at the latest version 
+    apt: pkg=nginx state=present update_cache=true
+
+  - name: start nginx
+    service:
+       name: nginx
+       state: started
+  - name: clone a public repository
+    git:
+      repo: https://github.com/ani1203/learnDjango.git
+      dest: /home/ubuntu/learnDjango
+      version: master
+  - name: copy requirements.txt file 
+    copy: 
+      src: /etc/ansible/playbooks/requirements.txt
+      dest: /home/ubuntu/learnDjango
+  - name: copy gunicorn service file
+    copy:
+       src: /etc/ansible/playbooks/gunicorn.service
+       dest: /etc/systemd/system
+  - name: copy nginx file
+    copy: 
+       src: /etc/ansible/playbooks/learnDjango
+       dest: /etc/nginx/sites-available     
+  
+  - name: install virtualenv
+    pip: name=virtualenv state=latest virtualenv_command=virtualenv
+
+  - name: creating virtualenv
+    command: virtualenv /home/ubuntu/venv
+  
+  - name: activating environment
+    command: source /home/ubuntu/venv/bin/activate

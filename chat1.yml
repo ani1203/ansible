@@ -1,0 +1,86 @@
+---
+- hosts: all
+ remote_user: ubuntu
+ sudo: yes
+ tasks:
+   - name: Install dependencies required to setup a new version of Python
+     apt: pkg={{ item }} state=latest
+     tags: [packages]
+     with_items:
+       - python3-pip
+       - python3-dev
+       - nginx
+       - git
+
+   - name: clone a public repository
+     git:
+       repo: https://github.com/ani1203/learnDjango.git
+       dest: /home/ubuntu/learnDJango
+       version: master
+
+   - name: install virtualenv
+     pip: name=virtualenv state=latest virtualenv_command=virtualenv
+
+   - name: creating virtualenv
+     command: virtualenv /home/ubuntu/venv
+
+   - name: activating environment
+     command: cd /home/ubuntu/venv; source bin/activate
+     command: /home/ubuntu/venv/bin/pip install -r /home/ubuntu/learnDjango/requirements.txt
+
+   - name: Install gunicorn
+     pip: name=gunicorn state=latest virtualenv=/home/ubuntu/venv
+
+   # - django_manage:
+   #     command: collectstatic
+   #     app_path: /home/ubuntu/new_chatapp/fundoo/
+
+   - name: Ansible copy file to remote host
+     copy:
+       src: ~/Desktop/gunicorn.service
+       dest: /etc/systemd/system/
+       force: no
+
+   - name: restart service gunicorn
+     systemd:
+       state: restarted
+       daemon_reload: yes
+       name: gunicorn
+
+
+   - name: Ansible copy file force
+     copy:
+       src: ~/Desktop/fundoo
+       dest: /etc/nginx/sites-available/
+       force: no
+
+   # - file:
+   #     src: /etc/nginx/sites-available/fundoo
+   #     dest: /etc/nginx/sites-enabled
+   #     owner: root
+   #     group: root
+   #     mode: 0755
+   #     state: link
+
+   - name: delete file from sites-enabled
+     file:
+       path: /etc/nginx/sites-enabled/default
+       state: absent
+
+
+   - file:
+       src: "/etc/nginx/sites-available/learnDjango"
+       dest: "/etc/nginx/sites-enabled"
+       owner: ubuntu
+       group: ubuntu
+       state: link
+
+   - name: restart service nginx
+     systemd:
+       state: restarted
+       name: nginx
+
+   - name: restart service gunicorn again
+     systemd:
+       state: restarted
+       name: gunicorn

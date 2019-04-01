@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become: true
+  tasks:
+  - name: installing reqirements 
+    pip: 
+      requirements: /home/ubuntu/requirement.txt
+      virtualenv: /home/ubuntu/myenv
+      

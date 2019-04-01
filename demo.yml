@@ -1,0 +1,11 @@
+---
+- hosts: all  
+  user: root
+  vars: 
+   test_welcome: 'welcome to bridgelabzs networknuts\n live love learn linux\n'
+  tasks:
+   - name: sample
+     copy:
+      dest: /etc/test
+      content: "{{ test_welcome }}"
+...
