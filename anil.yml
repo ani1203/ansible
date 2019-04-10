@@ -1,24 +1,34 @@
 ---
 - hosts: all
   become: true
-  user: root
+  user: ubuntu
   tasks:
+  - name: change the ownership permissions
+    command: sudo chown -R ubuntu:ubuntu /home/ubuntu/
+
+  #- name: delete already existing files
+   # command: sudo rm -rf /home/ubuntu
+
   - name: execute command
     command: "{{item}}"
     with_items:
       - apt  update
       - apt install python3-pip python3-dev nginx git -y
-
+      
   - name: clone a public repository
-    git:
-      repo: https://github.com/ani1203/learnDjango.git
-      dest: /home/ubuntu/learnDjango
-      version: master
+    command: git clone https://github.com/ani1203/learnDjango.git
+    
+  - name: changing ownership of chatapp 
+    command: sudo chown -R ubuntu:ubuntu /home/ubuntu/learnDjango
+
   - name: copy requirements.txt file 
     copy: 
       src: /etc/ansible/playbooks/requirements.txt
       dest: /home/ubuntu/learnDjango
- 
+
+  - name: install virtualenv
+    pip: name=virtualenv state=latest virtualenv_command=virtualenv
+
   - name: creating virtualenv
     command: virtualenv /home/ubuntu/venv
 
@@ -35,7 +45,7 @@
       - apt  update
       - pip3 install Django==2.1.3
       - pip3 install channels
-      - pip3 install psycopg2
+        ###  pip3 install psycopg2
       - pip3 install django bcrypt django-extensions      
      
   - name: copy gunicorn service file
@@ -49,6 +59,7 @@
       - systemctl daemon-reload
       - systemctl start gunicorn
       - systemctl enable gunicorn
+
   - name: creating symbolic link
     command: sudo ln -s /etc/nginx/sites-available/learnDjango /etc/nginx/sites-enabled
  
@@ -79,4 +90,5 @@
     systemd:
       state: restarted
       name: gunicorn
+
 
